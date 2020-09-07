@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import axios from 'axios';
 
 function App() {
@@ -18,17 +19,30 @@ function App() {
 
 	const searchHandler = () => {
 		setUrl(`${apiUrl}q=${query}&token=${apiKey}`)
-		console.log(data);
+		console.log(data.articles);
 	}
+
+	let newsNodes = data.articles && data.articles.map((item) => {
+		return (
+			<li key={item.publishedAt}>
+				<a href={item.url}>{item.title}</a>
+			</li>
+		);
+	});
 
 	return (
     <>
-      <>
-				<input type='text' onChange={event => setQuery(event.target.value)} />
-				<button onClick={searchHandler}>Search</button>
-			</>
+			<input type='text' value={query} onChange={event => setQuery(event.target.value)} />
+			<button type="button" onClick={searchHandler}>Search</button>
+			<ul>
+				{newsNodes}
+			</ul>
     </>
   );
 }
+
+App.propTypes = {
+  data: PropTypes.array
+};
 
 export default App;
