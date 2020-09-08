@@ -9,12 +9,20 @@ function App() {
 	const [query, setQuery] = useState('');
 	const [url, setUrl] = useState(`https://gnews.io/api/v3/top-news?token=95e7679f627d5796aa24f6692def5df3`);
 	const [isLoading, setIsLoading] = useState(false);
+	const [isError, setIsError] = useState(false);
 
 	useEffect(() => {
     const fetchData = async () => {
+			setIsError(false);
 			setIsLoading(true);
-			const result = await axios(url);
-			setData(result.data);
+
+			try {
+				const result = await axios(url);
+				setData(result.data);
+			} catch (error) {
+				setIsError(true);
+			}
+
 			setIsLoading(false);
     };
     fetchData();
@@ -37,6 +45,9 @@ function App() {
     <>
 			<input type='text' value={query} onChange={event => setQuery(event.target.value)} />
 			<button type="button" onClick={searchHandler}>Search</button>
+
+			{isError && <div>Something went wrong ...</div>}
+
 			{isLoading ? (
         <div>Loading ...</div>
       ) : (
