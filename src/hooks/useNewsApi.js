@@ -1,32 +1,34 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useReducer } from 'react';
+import newsFetchReducer from '../reducers/newsFetchReducer'
 import axios from 'axios';
 
 const useNewsApi = () => {
-	const [data, setData] = useState([]);
 	const [url, setUrl] = useState(
 		`https://gnews.io/api/v3/top-news?token=95e7679f627d5796aa24f6692def5df3`,
 	);
-	const [isLoading, setIsLoading] = useState(false);
-	const [isError, setIsError] = useState(false);
+
+	const [state, dispatch] = useReducer(newsFetchReducer, {
+    isLoading: false,
+    isError: false,
+    data: [],
+  });
 
 	useEffect(() => {
     const fetchData = async () => {
-			setIsError(false);
-			setIsLoading(true);
+			dispatch({ type: 'FETCH_INIT'});
 
 			try {
 				const result = await axios(url);
-				setData(result.data);
+				dispatch({ type: 'FETCH_SUCCESS', payload: result.data });
 			} catch (error) {
-				setIsError(true);
+				dispatch({ type: 'FETCH_FAILURE'})
 			}
+		};
 
-			setIsLoading(false);
-    };
     fetchData();
 	}, [url]);
 
-	return [{ data, isLoading, isError}, setUrl];
+	return [state, setUrl];
 }
 
 export default useNewsApi;
