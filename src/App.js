@@ -1,41 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import useNewsApi from '../src/hooks/useNewsApi';
+import { v4 as uuidv4 } from 'uuid';
 import PropTypes from 'prop-types';
-import axios from 'axios';
 
 function App() {
 	const [apiUrl] = useState('https://gnews.io/api/v3/search?');
 	const [apiKey] = useState('95e7679f627d5796aa24f6692def5df3');
-	const [data, setData] = useState([]);
 	const [query, setQuery] = useState('');
-	const [url, setUrl] = useState(`https://gnews.io/api/v3/top-news?token=95e7679f627d5796aa24f6692def5df3`);
-	const [isLoading, setIsLoading] = useState(false);
-	const [isError, setIsError] = useState(false);
-
-	useEffect(() => {
-    const fetchData = async () => {
-			setIsError(false);
-			setIsLoading(true);
-
-			try {
-				const result = await axios(url);
-				setData(result.data);
-			} catch (error) {
-				setIsError(true);
-			}
-
-			setIsLoading(false);
-    };
-    fetchData();
-	}, [url]);
-
-	const searchHandler = () => {
-		setUrl(`${apiUrl}q=${query}&token=${apiKey}`)
-		console.log(data.articles);
-	}
+	const [{ data, isLoading, isError }, doFetch] = useNewsApi(
+		`${apiUrl}q=${query}&token=${apiKey}`,
+		{},
+	);
 
 	let newsNodes = data.articles && data.articles.map((item) => {
 		return (
-			<li key={item.publishedAt}>
+			<li key={uuidv4()}>
 				<a href={item.url}>{item.title}</a>
 			</li>
 		);
@@ -43,8 +22,19 @@ function App() {
 
 	return (
     <>
-			<input type='text' value={query} onChange={event => setQuery(event.target.value)} />
-			<button type="button" onClick={searchHandler}>Search</button>
+			<form
+				onSubmit={event => {
+					doFetch(`${apiUrl}q=${query}&token=${apiKey}`);
+
+					event.preventDefault();
+					setQuery('')
+        }}>
+				<input
+					type='text'
+					value={query}
+					onChange={event => setQuery(event.target.value)} />
+				<button type="submit">Search</button>
+			</form>
 
 			{isError && <div>Something went wrong ...</div>}
 
