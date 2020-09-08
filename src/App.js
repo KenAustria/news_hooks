@@ -8,11 +8,14 @@ function App() {
 	const [data, setData] = useState([]);
 	const [query, setQuery] = useState('');
 	const [url, setUrl] = useState(`https://gnews.io/api/v3/top-news?token=95e7679f627d5796aa24f6692def5df3`);
+	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
     const fetchData = async () => {
-      const result = await axios(url);
-      setData(result.data);
+			setIsLoading(true);
+			const result = await axios(url);
+			setData(result.data);
+			setIsLoading(false);
     };
     fetchData();
 	}, [url]);
@@ -34,9 +37,13 @@ function App() {
     <>
 			<input type='text' value={query} onChange={event => setQuery(event.target.value)} />
 			<button type="button" onClick={searchHandler}>Search</button>
-			<ul>
-				{newsNodes}
-			</ul>
+			{isLoading ? (
+        <div>Loading ...</div>
+      ) : (
+				<ul>
+					{newsNodes}
+				</ul>
+			)}
     </>
   );
 }
